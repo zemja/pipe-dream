@@ -1,0 +1,115 @@
+- [X] Get all the built-in commands working.
+- [X] =cd= to the current directory on startup.
+- [X] Use ~iced_graphics::Renderer~?
+- [X] Why the fuck has the table stopped drawing like a fucking table?
+- [X] Let the table headers be bold.
+- [X] How to use ~Command~⁠s properly?
+
+  ~update()~ returns a ~Command~ now, are you using it right?
+- [-] Display values properly.
+
+  It seems like Nushell decides whether something is a table, based on whether every value is a record. If the column names are different between records, then it just puts an empty value in the relevant cells of rows without those columns.
+  - [X] Are column names case sensitive?
+
+    Yes.
+  - [X] How to set a default font and size?
+  - [X] Oh shit, there's a =table= type. Display it properly.
+
+    Do =[{thing: THANG}, {thing: THINGY}] | describe= to see what I mean. (Interestingly, why isn't it a list of records if the keys are different?)
+  - [X] Colour the =Nothing= values properly.
+
+    Probably have a single place to convert a value to a UI element.
+  - [ ] Display all the individual types of value nicely.
+
+    Particularly records.
+  - [ ] Handle a table inside a table.
+
+    This isn't that important, but will lead to some necessary refactoring and simplification.
+- [ ] Print errors properly.
+
+  You saw in the ~std::error::Error~ documentation:
+
+  #+begin_quote
+  Error messages are typically concise lowercase sentences without trailing punctuation.
+  #+end_quote
+
+  So, may as well stick to that convention.
+- [ ] Populate all the environment variables.
+
+  That is, get all the environment variables according to your executable, and hand them to the shell. It seems like this is probably the best way to =cd= to the current directory at startup.
+- [X] Use styles to do font sizes the Right Way.
+- [ ] Remove any =TODO= comments.
+- [ ] Handle ~nu_command::create_default_context()~ failing.
+
+  At the moment that function just prints an error message on failure instead of returning a ~Result~. Annoying.
+- [ ] Make external commands work.
+- [ ] Make pipelines work properly.
+- [ ] Take a nice screenshot for the README.
+- [ ] What's ~PipelineMetadata~?
+
+  Use it about the place while you're matching on ~PipelineData~.
+- [ ] Read from standard error with external streams.
+
+  See ~nu_protocol::pipeline_data::print_if_stream()~.
+- [ ] Handle non-UTF-8 command output.
+- [ ] Use the error border for the prompt if there's some problem with the command.
+- [ ] Be able to select text with the mouse.
+
+  This is probably Iced's fault. Yikes.
+
+  Actually, since you can select text in a ~TextInput~, you could probably just use a ~TextInput~ and disable the input. Or perhaps there's just something you need to set somewhere.
+
+
+* Wishlist
+- Handle pipelines in the middle of your prompt.
+
+  Allow it? Split it into two buffers?
+- Handle giant pipelines sensibly.
+
+  So it doesn't just crash if you try to hold too much in RAM.
+- Make it read your configuration.
+
+  About the place when you're passing "config" in as a parameter, use the user's configuration, instead of doing ~nu_protocol::Config::default()~.
+- Show the current directory somewhere.
+- Have a prompt placeholder text like =>= at the start of a command, and =|= in the middle of a pipeline.
+- Be able to customise the prompt's placeholder text?
+
+  That would give you a nice way of showing the current directory, and whether it's a pipeline stage or a new command.
+- Be able to search in the current pipeline.
+
+  And easily navigate, like Emacs' Isearch.
+- Support completion.
+- Support syntax highlighting in the prompt.
+- Display errors nicely.
+- Run commands and display their output asynchronously.
+- Show error return codes of commands somewhere.
+- Handle terminal colours.
+- Be able to change the colours.
+
+  Of the output and the UI.
+- Be able to paste in your clipboard as terminal output at the beginning of a pipeline.
+- When you edit something from back in the pipeline, re-compute the pipeline after that point.
+- Have an option to duplicate the current command.
+
+  And have it keep the cursor's position in the pipeline. The point is to be able to split the pipeline in the middle, and make a change which won't be reflected in the original.
+- Copy the current pipeline to the clipboard as text.
+- Can you open a =.nu= script with it, and load the whole thing as pipelines?
+- Be able to read from standard input.
+
+  So you can give your password to =sudo=, for instance.
+- Display things in a fancy way:
+  - Display records/tables inside other records/tables.
+  - Display media, like images and perhaps audio.
+  - Render markdown nicely, and other markup formats?
+
+    You know, when you run the ~open~ command, perhaps display it as a nice document.
+  - Clickable hyperlinks.
+- Be able to complete column names.
+
+  You can't do this in the normal Nushell, but if the preceding stages of the pipeline are already evaluated by the time you come to request a completion, you could totally complete the column names.
+- Allow cancelling commands with =C-c=.
+
+  Or just a cancel button. See ~ListStream::ctrlc~.
+- Have a fancy table header row.
+
+  I have two ideas. Preferably, have it so that the table stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
