@@ -113,3 +113,19 @@
 - Have a fancy table header row.
 
   I have two ideas. Preferably, have it so that the table stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
+- Have a REALLY convenient way of running =each=.
+
+  Probably just =C-e= (or something) sets the prompt to =each { |it| | }=, where =|= is the cursor. People will run this ALL the time.
+
+  If you want to be super jazzy, then if you press =C-e= with a particular column selected (somehow), you'll end up with something like:
+
+  #+begin_example
+  each { |it| {name: $it.name, size: $it.size, type: (|)} }
+  #+end_example
+
+  Assuming the =type= column was selected, now you can type a pipeline which only affects that one column and leaves the rest intact.
+
+  Or perhaps an easier way: couldn't just have an option for =each= where you give it a column, then it runs =each= on only that column? Maybe add that as a pull request, or something.
+- Have a way of saving the current output to a file.
+
+  Useful if some external thing messes you up, so the output only lives in your open instance of Pipe Dream and you want to keep it.
