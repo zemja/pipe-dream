@@ -19,12 +19,20 @@
   - [X] Colour the =Nothing= values properly.
 
     Probably have a single place to convert a value to a UI element.
+  - [ ] Align tables properly.
+
+    Try and display =[{hello: thing}, {there: thang}]= properly. It's wrong. (Both values are drawn in the "hello" column, where the second should be drawn in the "there" column.)
   - [ ] Display all the individual types of value nicely.
 
     Particularly records.
   - [ ] Handle a table inside a table.
 
     This isn't that important, but will lead to some necessary refactoring and simplification.
+- [ ] Refactor to hide Nushell.
+
+  Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
+
+  It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. Try and neaten this.
 - [ ] Print errors properly.
 
   You saw in the ~std::error::Error~ documentation:
@@ -58,6 +66,9 @@
   This is probably Iced's fault. Yikes.
 
   Actually, since you can select text in a ~TextInput~, you could probably just use a ~TextInput~ and disable the input. Or perhaps there's just something you need to set somewhere.
+- [ ] Call Nushell externally, don't embed it in the program.
+
+  So that it uses whichever version of Nushell you happen to have installed. It's probably better that way. Plus it removes a hell of a lot of compile-time dependencies.
 
 
 * Wishlist
@@ -113,6 +124,8 @@
 - Have a fancy table header row.
 
   I have two ideas. Preferably, have it so that the table stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
+
+  Actually, having the table header row docked at the top would be really easy. Just have the header row be separate from the actual table. Have a column with the header row, then below that, a ~Scrollable~ with the table contents.
 - Have a REALLY convenient way of running =each=.
 
   Probably just =C-e= (or something) sets the prompt to =each { |it| | }=, where =|= is the cursor. People will run this ALL the time.

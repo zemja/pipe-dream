@@ -90,11 +90,12 @@ impl From<Vec<Value>> for Output {
                 table.header_row.len()
             ];
 
-            for (index, (rec_col, rec_val)) in record.cols.into_iter()
-                .zip(record.vals.into_iter())
-                .enumerate() {
+            for (rec_col, rec_val) in record.cols.into_iter().zip(record.vals.into_iter())
+            {
                 // If a column is in the table, but not the record, the value is left as empty.
-                if table.header_row.contains(&rec_col) {
+                if let Some((index, _)) = table.header_row.iter()
+                    .enumerate()
+                    .find(|&(_, row)| row == &rec_col) {
                     new_row[index] = Value(rec_val);
                 }
             }
