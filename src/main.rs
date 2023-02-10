@@ -3,7 +3,7 @@ mod shell;
 mod theme;
 
 use s_macro::s;
-use iced::widget::{Column, Container, Row, Scrollable, Text, TextInput};
+use iced::widget::{Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Application, Command, Length, Settings};
 use iced_graphics::alignment::Horizontal;
 use crate::output::Output;
@@ -34,9 +34,9 @@ type Element<'a>
 
 impl Application for PipeDream {
     type Executor = iced::executor::Default;
-    type Flags = ();
     type Message = Message;
     type Theme = theme::Theme;
+    type Flags = ();
 
     fn new(_flags: ()) -> (PipeDream, Command<Message>) {
         let pipe_dream = PipeDream {
@@ -71,7 +71,7 @@ impl Application for PipeDream {
         }
 
         let body: Element = match self.last_output.as_ref() {
-            Ok(output) => output.into(),
+            Ok(output) => output.clone().into(),
             Err(err) => Text::new(s!("Error: {err}")).style(Style::Error).into(),
         };
 
@@ -88,8 +88,8 @@ impl Application for PipeDream {
     }
 }
 
-impl<'a> From<&'a Output> for Element<'a> {
-    fn from(value: &'a Output) -> Element {
+impl<'a> From<Output> for Element<'a> {
+    fn from(value: Output) -> Element<'a> {
         match value {
             Output::Empty => Text::new(s!("Nothing"))
                 .style(Style::Shadow)
@@ -100,7 +100,7 @@ impl<'a> From<&'a Output> for Element<'a> {
 
             Output::Table(table) => {
                 let mut rows = vec![
-                    Row::with_children(table.header_row.iter()
+                    Row::with_children(table.header_row.into_iter()
                         .map(|column| Text::new(column)
                             .style(Style::Emphasis)
                             .horizontal_alignment(Horizontal::Center)
@@ -109,35 +109,63 @@ impl<'a> From<&'a Output> for Element<'a> {
                         .collect())
                 ];
 
-                for row in table.rows.iter() {
-                    rows.push(Row::with_children(row.iter().map(Element::from).collect()));
+                for row in table.rows.into_iter() {
+                    rows.push(Row::with_children(row.into_iter().map(Element::from).collect()));
                 }
 
                 Column::with_children(rows.into_iter().map(Element::from).collect()).into()
             }
 
-            Output::List(values) => Column::with_children(values.iter()
-                    .map(Element::from).collect())
-                .into(),
+            Output::List(values)
+                => Column::with_children(values.into_iter().map(Element::from).collect()).into(),
 
             Output::Raw(Err(err)) => Text::new(s!("Error reading raw stream: {err}"))
                 .style(Style::Error)
                 .into(),
 
-            Output::Raw(Ok(bytes)) => Text::new(String::from_utf8_lossy(bytes).to_string()).into(),
+            Output::Raw(Ok(bytes))
+                => Text::new(String::from_utf8_lossy(bytes.as_slice()).to_string()).into(),
         }
     }
 }
 
-impl<'a> From<&output::Value> for Element<'a> {
-    fn from(value: &output::Value) -> Element<'a> {
+fn make_column<'a>(values: impl Iterator<Item = nu_protocol::Value>) -> Element<'a> {
+    Column::with_children(values.map(|val| match val {
+        nu_protocol::Value::Record { cols, .. }
+            => Text::new(s!("Record {} rows", cols.len())).into(),
+        nu_protocol::Value::List { vals, .. }
+            => Text::new(s!("List {} rows", vals.len())).into(),
+        val => Element::from(output::Value(val)),
+    }).collect())
+        .into()
+}
+
+impl<'a> From<output::Value> for Element<'a> {
+    fn from(value: output::Value) -> Element<'a> {
         match value {
             output::Value(nu_protocol::Value::Nothing { .. })
-                => Text::new(s!("Nothing")).style(Style::Shadow),
+                => Text::new(s!("Nothing")).style(Style::Shadow).width(Length::Fill).into(),
+
+            output::Value(nu_protocol::Value::Error { error })
+                => Text::new(error.to_string()).style(Style::Error).width(Length::Fill).into(),
+
+            output::Value(nu_protocol::Value::Record { cols, vals, .. }) => {
+                Row::new()
+                    .push(Column::with_children(cols.into_iter()
+                        .map(|col| Text::new(col)
+                            .style(Style::Emphasis)
+                            .horizontal_alignment(Horizontal::Right)
+                            .into())
+                        .collect()))
+                    .push(Space::new(Length::Units(10), Length::Shrink))
+                    .push(make_column(vals.into_iter()))
+                    .into()
+            }
+
+            output::Value(nu_protocol::Value::List { vals, .. }) => make_column(vals.into_iter()),
 
             value => Text::new(value.0.into_string(", ", &nu_protocol::Config::default()))
+                .width(Length::Fill).into(),
         }
-            .width(Length::Fill)
-            .into()
     }
 }

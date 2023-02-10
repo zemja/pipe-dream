@@ -6,7 +6,7 @@
 - [X] How to use ~Command~⁠s properly?
 
   ~update()~ returns a ~Command~ now, are you using it right?
-- [-] Display values properly.
+- [X] Display values properly.
 
   It seems like Nushell decides whether something is a table, based on whether every value is a record. If the column names are different between records, then it just puts an empty value in the relevant cells of rows without those columns.
   - [X] Are column names case sensitive?
@@ -19,15 +19,18 @@
   - [X] Colour the =Nothing= values properly.
 
     Probably have a single place to convert a value to a UI element.
-  - [ ] Align tables properly.
+  - [X] Align tables properly.
 
     Try and display =[{hello: thing}, {there: thang}]= properly. It's wrong. (Both values are drawn in the "hello" column, where the second should be drawn in the "there" column.)
-  - [ ] Display all the individual types of value nicely.
+  - [3/3] Display all the individual types of value nicely.
 
-    Particularly records.
-  - [ ] Handle a table inside a table.
+    Most things can just be converted to a string like they are already, but you should have a special display for:
+    - [X] ~Record~.
+    - [X] ~Error~.
+    - [X] ~List~.
+  - [X] Handle a table inside a table.
 
-    This isn't that important, but will lead to some necessary refactoring and simplification.
+    For now, just print "table" or something. Same goes for ~Record~⁠s and ~List~⁠s, maybe more.
 - [ ] Refactor to hide Nushell.
 
   Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
@@ -66,6 +69,13 @@
   This is probably Iced's fault. Yikes.
 
   Actually, since you can select text in a ~TextInput~, you could probably just use a ~TextInput~ and disable the input. Or perhaps there's just something you need to set somewhere.
+- [ ] Let tables be drawn as a single row of many columns, rather than a single column of many rows.
+
+  Refactor the ~Table~ struct to have columns, rather than rows. This partly means that every column has a header (and you don't need to hope all the rows are the same length as the header). Mostly, it means that you can figure out what width to make each column. You can just have every column have a width of ~Length::Shrink~. Then the last column can be ~Length::Fill~, probably.
+
+  If there was some cleverer way of picking the right column to make widest, rather than just picking the last, that would be lovely. But whatever.
+
+  If you have tables in tables, that will mess everything up for reasons I can't be bothered to describe.
 - [ ] Call Nushell externally, don't embed it in the program.
 
   So that it uses whichever version of Nushell you happen to have installed. It's probably better that way. Plus it removes a hell of a lot of compile-time dependencies.
