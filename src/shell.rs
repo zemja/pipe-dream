@@ -8,13 +8,13 @@ pub struct Nushell {
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Failed to parse command: {0:?}")]
+    #[error("failed to parse command: {0:?}")]
     Parse(#[from] nu_parser::ParseError),
-    #[error("Failed to evaluate command: {0:?}")]
+    #[error("failed to evaluate command: {0:?}")]
     Shell(#[from] nu_protocol::ShellError),
     #[error("I/O error: {0}")]
     IO(#[from] std::io::Error),
-    #[error("Path is not valid UTF-8.")]
+    #[error("path is not valid UTF-8")]
     InvalidPath,
 }
 
@@ -24,7 +24,8 @@ impl Nushell {
     pub fn new() -> Result<Nushell> {
         let mut nushell = Nushell {
             // Infuriating that this function just prints an error message if it fails and doesn't
-            // return a Result.
+            // return a Result. But the only failure is something to do with plugins, so fingers
+            // crossed that's not my problem.
             engine_state: nu_command::create_default_context(),
             stack: nu_protocol::engine::Stack::new()
         };

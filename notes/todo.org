@@ -35,8 +35,8 @@
 
   Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
 
-  It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. Try and neaten this.
-- [ ] Print errors properly.
+  It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. The Nu stuff is a bit too closely tied to the UI stuff for comfort. Try and neaten this.
+- [X] Print errors properly.
 
   You saw in the ~std::error::Error~ documentation:
 

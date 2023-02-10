@@ -132,9 +132,9 @@ impl<'a> From<Output> for Element<'a> {
 fn make_column<'a>(values: impl Iterator<Item = nu_protocol::Value>) -> Element<'a> {
     Column::with_children(values.map(|val| match val {
         nu_protocol::Value::Record { cols, .. }
-            => Text::new(s!("Record {} rows", cols.len())).into(),
+            => Text::new(s!("Record {} rows", cols.len())).style(Style::Shadow).into(),
         nu_protocol::Value::List { vals, .. }
-            => Text::new(s!("List {} rows", vals.len())).into(),
+            => Text::new(s!("List {} rows", vals.len())).style(Style::Shadow).into(),
         val => Element::from(output::Value(val)),
     }).collect())
         .into()
