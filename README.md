@@ -41,7 +41,7 @@ Now you want to find the length of the longest line for each of them. So, just t
 
 `each { |it| {name: $it.name, longest: (open --raw $it.name | lines)} }`
 
-Just to see what happens. You get a lot of `[list XYZ items]`. To investigate, you run:
+You get a lot of `[list XYZ items]`. To investigate, you run:
 
 `get longest.0`
 

@@ -36,6 +36,12 @@
   Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
 
   It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. The Nu stuff is a bit too closely tied to the UI stuff for comfort. Try and neaten this.
+- [ ] Populate all the environment variables.
+
+  That is, get all the environment variables according to your executable, and hand them to the shell. It seems like this is probably the best way to =cd= to the current directory at startup.
+- [ ] Sort out this list.
+
+  Get the actual workflow, of stepping through your command pipeline, working first. Then do all the nice details below. Turn this into a proper Org todo list while you're at it.
 - [X] Print errors properly.
 
   You saw in the ~std::error::Error~ documentation:
@@ -45,14 +51,8 @@
   #+end_quote
 
   So, may as well stick to that convention.
-- [ ] Populate all the environment variables.
-
-  That is, get all the environment variables according to your executable, and hand them to the shell. It seems like this is probably the best way to =cd= to the current directory at startup.
 - [X] Use styles to do font sizes the Right Way.
 - [ ] Remove any =TODO= comments.
-- [ ] Handle ~nu_command::create_default_context()~ failing.
-
-  At the moment that function just prints an error message on failure instead of returning a ~Result~. Annoying.
 - [ ] Make external commands work.
 - [ ] Make pipelines work properly.
 - [ ] Take a nice screenshot for the README.

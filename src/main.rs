@@ -11,6 +11,8 @@ use crate::theme::Style;
 
 pub fn main() -> iced::Result {
     PipeDream::run(Settings {
+        id: Some(s!("Pipe Dream")),
+        text_multithreading: true,
         default_font: Some(include_bytes!("../res/inconsolata.ttf")),
         default_text_size: 16,
         ..Default::default()
@@ -59,7 +61,7 @@ impl Application for PipeDream {
                 if let Ok(shell) = self.shell.as_mut() {
                     self.last_output = shell.evaluate(&self.prompt).map(|output| output.into());
                 }
-            },
+            }
         }
 
         Command::none()
