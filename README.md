@@ -59,7 +59,7 @@ So, the highlights:
 
 - Easy and lazy.
 
-  This is not the most efficient way of doing things, but that's not the point. You'll only ever want to run this once, and now you have your answer, you don't really need the code you typed ever again.
+  This is not the most efficient way of doing things, but that's not the point. You'll only ever want to run this once, and now that you have your answer, you don't really need the code you typed ever again.
 - Saves time avoiding having to run the whole pipeline again every time.
 
   Plus, it improves the irritating workflow where you run a command a second time, adding `| less` if the output is long. Sure, you can scroll back, but only if your prompt really stands out visually so you can tell where the command started in the output. In Pipe Dream, each command is in its own graphical window with a scroll bar, so output is already "paged".
