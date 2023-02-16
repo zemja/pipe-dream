@@ -1,154 +1,146 @@
-- [X] Get all the built-in commands working.
-- [X] =cd= to the current directory on startup.
-- [X] Use ~iced_graphics::Renderer~?
-- [X] Why the fuck has the table stopped drawing like a fucking table?
-- [X] Let the table headers be bold.
-- [X] How to use ~Command~⁠s properly?
+* NOW Get the basic workflow working
 
-  ~update()~ returns a ~Command~ now, are you using it right?
-- [X] Display values properly.
+** TODO Refactor to hide Nushell
+Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
 
-  It seems like Nushell decides whether something is a table, based on whether every value is a record. If the column names are different between records, then it just puts an empty value in the relevant cells of rows without those columns.
-  - [X] Are column names case sensitive?
+It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. The Nu stuff is a bit too closely tied to the UI stuff for comfort. Try and neaten this.
 
-    Yes.
-  - [X] How to set a default font and size?
-  - [X] Oh shit, there's a =table= type. Display it properly.
+** TODO Populate all the environment variables
+That is, get all the environment variables according to your executable, and hand them to the shell. It seems like this is probably the best way to =cd= to the current directory at startup.
 
-    Do =[{thing: THANG}, {thing: THINGY}] | describe= to see what I mean. (Interestingly, why isn't it a list of records if the keys are different?)
-  - [X] Colour the =Nothing= values properly.
+** TODO Remove any =TODO= comments
 
-    Probably have a single place to convert a value to a UI element.
-  - [X] Align tables properly.
+** TODO Make external commands work
 
-    Try and display =[{hello: thing}, {there: thang}]= properly. It's wrong. (Both values are drawn in the "hello" column, where the second should be drawn in the "there" column.)
-  - [3/3] Display all the individual types of value nicely.
+** TODO Make pipelines work properly
 
-    Most things can just be converted to a string like they are already, but you should have a special display for:
-    - [X] ~Record~.
-    - [X] ~Error~.
-    - [X] ~List~.
-  - [X] Handle a table inside a table.
+** TODO Take a nice screenshot for the =README=
 
-    For now, just print "table" or something. Same goes for ~Record~⁠s and ~List~⁠s, maybe more.
-- [ ] Refactor to hide Nushell.
+* TODO Do things properly
 
-  Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
+** TODO What's ~PipelineMetadata~?
+Use it about the place while you're matching on ~PipelineData~.
 
-  It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. The Nu stuff is a bit too closely tied to the UI stuff for comfort. Try and neaten this.
-- [ ] Populate all the environment variables.
+** TODO Read from standard error with external streams
+See ~nu_protocol::pipeline_data::print_if_stream()~.
 
-  That is, get all the environment variables according to your executable, and hand them to the shell. It seems like this is probably the best way to =cd= to the current directory at startup.
-- [ ] Sort out this list.
+** TODO Handle non-UTF-8 command output
 
-  Get the actual workflow, of stepping through your command pipeline, working first. Then do all the nice details below. Turn this into a proper Org todo list while you're at it.
-- [X] Print errors properly.
+** TODO Use the error border for the prompt if there's some problem with the command
 
-  You saw in the ~std::error::Error~ documentation:
+** TODO Be able to select text with the mouse
+This is probably Iced's fault. Yikes.
 
-  #+begin_quote
-  Error messages are typically concise lowercase sentences without trailing punctuation.
-  #+end_quote
+Actually, since you can select text in a ~TextInput~, you could probably just use a ~TextInput~ and disable the input. Or perhaps there's just something you need to set somewhere.
 
-  So, may as well stick to that convention.
-- [X] Use styles to do font sizes the Right Way.
-- [ ] Remove any =TODO= comments.
-- [ ] Make external commands work.
-- [ ] Make pipelines work properly.
-- [ ] Take a nice screenshot for the README.
-- [ ] What's ~PipelineMetadata~?
+** TODO Transpose how you draw tables
 
-  Use it about the place while you're matching on ~PipelineData~.
-- [ ] Read from standard error with external streams.
+Let tables be drawn as a single row of many columns, rather than a single column of many rows.
 
-  See ~nu_protocol::pipeline_data::print_if_stream()~.
-- [ ] Handle non-UTF-8 command output.
-- [ ] Use the error border for the prompt if there's some problem with the command.
-- [ ] Be able to select text with the mouse.
+Refactor the ~Table~ struct to have columns, rather than rows. This partly means that every column has a header (and you don't need to hope all the rows are the same length as the header). Mostly, it means that you can figure out what width to make each column. You can just have every column have a width of ~Length::Shrink~. Then the last column can be ~Length::Fill~, probably.
 
-  This is probably Iced's fault. Yikes.
+If there was some cleverer way of picking the right column to make widest, rather than just picking the last, that would be lovely. But whatever.
 
-  Actually, since you can select text in a ~TextInput~, you could probably just use a ~TextInput~ and disable the input. Or perhaps there's just something you need to set somewhere.
-- [ ] Let tables be drawn as a single row of many columns, rather than a single column of many rows.
+If you have tables in tables, that will mess everything up for reasons I can't be bothered to describe.
 
-  Refactor the ~Table~ struct to have columns, rather than rows. This partly means that every column has a header (and you don't need to hope all the rows are the same length as the header). Mostly, it means that you can figure out what width to make each column. You can just have every column have a width of ~Length::Shrink~. Then the last column can be ~Length::Fill~, probably.
+** TODO Call Nushell externally, don't embed it in the program
+So that it uses whichever version of Nushell you happen to have installed. It's probably better that way. Plus it removes a hell of a lot of compile-time dependencies.
 
-  If there was some cleverer way of picking the right column to make widest, rather than just picking the last, that would be lovely. But whatever.
+* Misc.
 
-  If you have tables in tables, that will mess everything up for reasons I can't be bothered to describe.
-- [ ] Call Nushell externally, don't embed it in the program.
-
-  So that it uses whichever version of Nushell you happen to have installed. It's probably better that way. Plus it removes a hell of a lot of compile-time dependencies.
-
+** DONE Sort out this list
+CLOSED: [2023-02-16 Thu 16:29]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2023-02-16 Thu 16:29]
+:END:
+Get the actual workflow, of stepping through your command pipeline, working first. Then do all the
+nice details below. Turn this into a proper Org todo list while you're at it.
 
 * Wishlist
-- Handle pipelines in the middle of your prompt.
 
-  Allow it? Split it into two buffers?
-- Handle giant pipelines sensibly.
+** Handle pipelines in the middle of your prompt
+Allow it? Split it into two buffers?
 
-  So it doesn't just crash if you try to hold too much in RAM.
-- Make it read your configuration.
+** Handle giant pipelines sensibly
+So it doesn't just crash if you try to hold too much in RAM.
 
-  About the place when you're passing "config" in as a parameter, use the user's configuration, instead of doing ~nu_protocol::Config::default()~.
-- Show the current directory somewhere.
-- Have a prompt placeholder text like =>= at the start of a command, and =|= in the middle of a pipeline.
-- Be able to customise the prompt's placeholder text?
+** Make it read your configuration
+About the place when you're passing "config" in as a parameter, use the user's configuration, instead of doing ~nu_protocol::Config::default()~.
 
-  That would give you a nice way of showing the current directory, and whether it's a pipeline stage or a new command.
-- Be able to search in the current pipeline.
+** Show the current directory somewhere
 
-  And easily navigate, like Emacs' Isearch.
-- Support completion.
-- Support syntax highlighting in the prompt.
-- Display errors nicely.
-- Run commands and display their output asynchronously.
-- Show error return codes of commands somewhere.
-- Handle terminal colours.
-- Be able to change the colours.
+** Improve the prompt placeholder text
+Have a prompt placeholder text like =>= at the start of a command, and =|= in the middle of a pipeline.
 
-  Of the output and the UI.
-- Be able to paste in your clipboard as terminal output at the beginning of a pipeline.
-- When you edit something from back in the pipeline, re-compute the pipeline after that point.
-- Have an option to duplicate the current command.
+** Be able to customise the prompt's placeholder text?
+That would give you a nice way of showing the current directory, and whether it's a pipeline stage or a new command.
 
-  And have it keep the cursor's position in the pipeline. The point is to be able to split the pipeline in the middle, and make a change which won't be reflected in the original.
-- Copy the current pipeline to the clipboard as text.
-- Can you open a =.nu= script with it, and load the whole thing as pipelines?
-- Be able to read from standard input.
+** Be able to search in the current pipeline
+And easily navigate, like Emacs' Isearch.
 
-  So you can give your password to =sudo=, for instance.
-- Display things in a fancy way:
-  - Display records/tables inside other records/tables.
-  - Display media, like images and perhaps audio.
-  - Render markdown nicely, and other markup formats?
+** Support completion
 
-    You know, when you run the ~open~ command, perhaps display it as a nice document.
-  - Clickable hyperlinks.
-- Be able to complete column names.
+** Support syntax highlighting in the prompt
 
-  You can't do this in the normal Nushell, but if the preceding stages of the pipeline are already evaluated by the time you come to request a completion, you could totally complete the column names.
-- Allow cancelling commands with =C-c=.
+** Display errors nicely
 
-  Or just a cancel button. See ~ListStream::ctrlc~.
-- Have a fancy table header row.
+** Run commands and display their output asynchronously
 
-  I have two ideas. Preferably, have it so that the table stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
+** Show error return codes of commands somewhere
 
-  Actually, having the table header row docked at the top would be really easy. Just have the header row be separate from the actual table. Have a column with the header row, then below that, a ~Scrollable~ with the table contents.
-- Have a REALLY convenient way of running =each=.
+** Handle terminal colours
 
-  Probably just =C-e= (or something) sets the prompt to =each { |it| | }=, where =|= is the cursor. People will run this ALL the time.
+** Be able to change the colours
+Of the output and the UI.
 
-  If you want to be super jazzy, then if you press =C-e= with a particular column selected (somehow), you'll end up with something like:
+** Be able to paste your clipboard as terminal output at the beginning of a pipeline
 
-  #+begin_example
-  each { |it| {name: $it.name, size: $it.size, type: (|)} }
-  #+end_example
+** When you edit something from back in the pipeline, re-compute the pipeline after that point
 
-  Assuming the =type= column was selected, now you can type a pipeline which only affects that one column and leaves the rest intact.
+** Have an option to duplicate the current command
+And have it keep the cursor's position in the pipeline. The point is to be able to split the pipeline in the middle, and make a change which won't be reflected in the original.
 
-  Or perhaps an easier way: couldn't just have an option for =each= where you give it a column, then it runs =each= on only that column? Maybe add that as a pull request, or something.
-- Have a way of saving the current output to a file.
+** Copy the current pipeline to the clipboard as text
 
-  Useful if some external thing messes you up, so the output only lives in your open instance of Pipe Dream and you want to keep it.
+** Can you open a =.nu= script with it, and load the whole thing as pipelines?
+
+** Be able to read from standard input
+So you can give your password to =sudo=, for instance.
+
+** Display things in a fancy way:
+
+*** Display records/tables inside other records/tables
+
+*** Display media, like images and perhaps audio
+
+*** Render markdown nicely, and other markup formats?
+You know, when you run the ~open~ command, perhaps display it as a nice document.
+
+*** Clickable hyperlinks
+
+** Be able to complete column names
+You can't do this in the normal Nushell, but if the preceding stages of the pipeline are already evaluated by the time you come to request a completion, you could totally complete the column names.
+
+** Allow cancelling commands with =C-c=
+Or just a cancel button. See ~ListStream::ctrlc~. It may or may not be relevant to handle other control characters, but perhaps implement them in some other way. This isn't supposed to be a terminal emulator.
+
+** Have a fancy table header row
+I have two ideas. Preferably, have it so that the table stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
+
+Actually, having the table header row docked at the top would be really easy. Just have the header row be separate from the actual table. Have a column with the header row, then below that, a ~Scrollable~ with the table contents.
+
+** Have a REALLY convenient way of running =each=
+Probably just =C-e= (or something) sets the prompt to =each { |it| | }=, where =|= is the cursor. People will run this ALL the time.
+
+If you want to be super jazzy, then if you press =C-e= with a particular column selected (somehow), you'll end up with something like:
+
+#+begin_example
+each { |it| {name: $it.name, size: $it.size, type: (|)} }
+#+end_example
+
+Assuming the =type= column was selected, now you can type a pipeline which only affects that one column and leaves the rest intact.
+
+Or perhaps an easier way: couldn't just have an option for =each= where you give it a column, then it runs =each= on only that column? Maybe add that as a pull request, or something.
+
+** Have a way of saving the current output to a file
+Useful if some external thing messes you up, so the output only lives in your open instance of Pipe Dream and you want to keep it. Then you can load it again later with =open=.
