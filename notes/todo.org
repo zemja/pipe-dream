@@ -1,14 +1,19 @@
 * NOW Get the basic workflow working
 
-** TODO Refactor to hide Nushell
-Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
-
-It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. The Nu stuff is a bit too closely tied to the UI stuff for comfort. Try and neaten this.
-
-** TODO Populate all the environment variables
+** DONE Populate all the environment variables
+CLOSED: [2023-02-16 Thu 17:08]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2023-02-16 Thu 17:08]
+:END:
 That is, get all the environment variables according to your executable, and hand them to the shell. It seems like this is probably the best way to =cd= to the current directory at startup.
 
+** TODO Fix records being displayed wrong
+Just run =$env= and you'll see that rows aren't aligned properly. Sort that out.
+
 ** TODO Remove any =TODO= comments
+
+** TODO Why isn't =which= working?
+It's not there, but you're loading everything, right?
 
 ** TODO Make external commands work
 
@@ -17,6 +22,11 @@ That is, get all the environment variables according to your executable, and han
 ** TODO Take a nice screenshot for the =README=
 
 * TODO Do things properly
+
+** TODO Refactor to hide Nushell
+Maybe put the ~evaluate()~ method behind some ~Shell~ trait, or something.
+
+It would make the output much cleaner. At the moment, command output starts as ~PipelineMetadata~, is converted to ~Output~, then converted to ~Element~. It's all a bit messy and inconsistent. The Nu stuff is a bit too closely tied to the UI stuff for comfort. Try and neaten this.
 
 ** TODO What's ~PipelineMetadata~?
 Use it about the place while you're matching on ~PipelineData~.
@@ -32,6 +42,11 @@ See ~nu_protocol::pipeline_data::print_if_stream()~.
 This is probably Iced's fault. Yikes.
 
 Actually, since you can select text in a ~TextInput~, you could probably just use a ~TextInput~ and disable the input. Or perhaps there's just something you need to set somewhere.
+
+** TODO Strip terminal control codes from the output
+At least until you get around to supporting things like [[id:a268a5bc-1fec-4c33-8d6c-508019a04045][terminal colours]].
+
+Perhaps [[https://docs.rs/ansi_term/latest/ansi_term/fn.unstyle.html][~ansi_term::unstyle()~]] can do this?
 
 ** TODO Transpose how you draw tables
 
@@ -89,11 +104,17 @@ And easily navigate, like Emacs' Isearch.
 ** Show error return codes of commands somewhere
 
 ** Handle terminal colours
+:PROPERTIES:
+:ID:       a268a5bc-1fec-4c33-8d6c-508019a04045
+:END:
 
 ** Be able to change the colours
 Of the output and the UI.
 
-** Be able to paste your clipboard as terminal output at the beginning of a pipeline
+** Copy/paste the terminal output
+Have an easy way to paste into the beginning of a pipeline, so you can process it. Plus copy to the clipboard as a string.
+
+What if the input/output is more complicated than a string? Copy/paste as JSON? Detect the format somehow? That would be awesome.
 
 ** When you edit something from back in the pipeline, re-compute the pipeline after that point
 

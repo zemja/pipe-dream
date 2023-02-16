@@ -14,8 +14,8 @@ pub enum Error {
     Shell(#[from] nu_protocol::ShellError),
     #[error("I/O error: {0}")]
     IO(#[from] std::io::Error),
-    #[error("path is not valid UTF-8")]
-    InvalidPath,
+    #[error(r#"environment variable is not valid UTF-8"#)]
+    InvalidEnvVar,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -30,15 +30,35 @@ impl Nushell {
             stack: nu_protocol::engine::Stack::new()
         };
 
-        // TODO Is this really the best way to handle errors here? (CDing to the current directory on startup.) See nu_cli::util::get_init_cwd().
-        if let Some(pwd) = std::env::current_dir().ok().or_else(dirs::home_dir) {
+        let mut pwd = false;
+
+        for (key, value) in std::env::vars_os() {
+            if key == "PWD" { pwd = true; }
+
             nushell.stack.add_env_var(
-                s!("PWD"),
+                key.into_string().map_err(|_| Error::InvalidEnvVar)?,
                 nu_protocol::Value::String {
-                    val: pwd.into_os_string().into_string().map_err(|_| Error::InvalidPath)?,
+                    val: value.into_string().map_err(|_| Error::InvalidEnvVar)?,
                     span: nu_protocol::Span::unknown()
                 }
-            );
+            )
+        }
+
+        // If they don't have the PWD environment variable for some reason, default to their home
+        // directory. If they don't have a home directory, or if the path isn't valid UTF-8, they're
+        // SOL for now.
+        if !pwd {
+            if let Some(home) = dirs::home_dir() {
+                if let Some(home) = home.to_str() {
+                    nushell.stack.add_env_var(
+                        s!("PWD"),
+                        nu_protocol::Value::String {
+                            val: home.to_string(),
+                            span: nu_protocol::Span::unknown(),
+                        }
+                    )
+                }
+            }
         }
 
         Ok(nushell)
