@@ -61,7 +61,9 @@ impl From<Vec<Value>> for Output {
         let records: Vec<_> = values.into_iter()
             .map(|value| {
                 match value {
-                    Value(nu_protocol::Value::Record { cols, vals, .. }) => {
+                    Value(nu_protocol::Value::Record {
+                        val: nu_protocol::Record { cols, vals }, ..
+                    }) => {
                         debug_assert_eq!(cols.len(), vals.len()); // I'm assuming this is how Nushell works.
                         Record { cols, vals }
                     },
@@ -86,7 +88,7 @@ impl From<Vec<Value>> for Output {
 
         for record in records {
             let mut new_row = vec![
-                Value(nu_protocol::Value::Nothing { span: Span::unknown() });
+                Value(nu_protocol::Value::Nothing { internal_span: Span::unknown() });
                 table.header_row.len()
             ];
 

@@ -133,7 +133,7 @@ impl<'a> From<Output> for Element<'a> {
 
 fn make_column<'a>(values: impl Iterator<Item = nu_protocol::Value>) -> Element<'a> {
     Column::with_children(values.map(|val| match val {
-        nu_protocol::Value::Record { cols, .. }
+        nu_protocol::Value::Record { val: nu_protocol::Record { cols, .. }, .. }
             => Text::new(s!("Record {} rows", cols.len())).style(Style::Shadow).into(),
         nu_protocol::Value::List { vals, .. }
             => Text::new(s!("List {} rows", vals.len())).style(Style::Shadow).into(),
@@ -148,10 +148,12 @@ impl<'a> From<output::Value> for Element<'a> {
             output::Value(nu_protocol::Value::Nothing { .. })
                 => Text::new(s!("Nothing")).style(Style::Shadow).width(Length::Fill).into(),
 
-            output::Value(nu_protocol::Value::Error { error })
+            output::Value(nu_protocol::Value::Error { error, .. })
                 => Text::new(error.to_string()).style(Style::Error).width(Length::Fill).into(),
 
-            output::Value(nu_protocol::Value::Record { cols, vals, .. }) => {
+            output::Value(nu_protocol::Value::Record {
+                val: nu_protocol::Record { cols, vals }, ..
+            }) => {
                 Row::new()
                     .push(Column::with_children(cols.into_iter()
                         .map(|col| Text::new(col)
