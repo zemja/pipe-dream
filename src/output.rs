@@ -8,6 +8,7 @@ pub struct Value(pub nu_protocol::Value);
 /// the same number of elements. It sucks to have to promise this, but it's so much easier to
 /// display when it's a vector of rows, rather than columns.
 #[derive(Clone, Debug)]
+#[allow(clippy::manual_non_exhaustive)]
 pub struct Table {
     pub header_row: Vec<String>,
     pub rows: Vec<Vec<Value>>,
@@ -22,7 +23,6 @@ pub enum Output {
     Empty,
     Value(Value),
     List(Vec<Value>),
-    /// Header row, then a vector of rows.
     Table(Table),
     Raw(Result<Vec<u8>, nu_protocol::ShellError>),
 }
@@ -46,7 +46,7 @@ impl From<PipelineData> for Output {
 }
 
 impl From<Vec<Value>> for Output {
-    /// Implemented for the special case that a list of records is to be treaded as a table.
+    /// Implemented for the special case that a list of records is to be treated as a table.
     fn from(values: Vec<Value>) -> Output {
         /// Makes records easier to work with.
         struct Record {

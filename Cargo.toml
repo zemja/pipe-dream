@@ -7,9 +7,7 @@ edition = "2021"
 
 [dependencies]
 s-macro = "0.1"
-iced = "0.7"
-iced_wgpu = "0.8"
-iced_graphics = "0.6"
+relm4 = "0.6"
 thiserror = "1.0"
 nu-protocol = "0.88"
 nu-engine = "0.88"
