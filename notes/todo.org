@@ -117,6 +117,7 @@ Have an easy way to paste into the beginning of a pipeline, so you can process i
 What if the input/output is more complicated than a string? Copy/paste as JSON? Detect the format somehow? That would be awesome.
 
 ** When you edit something from back in the pipeline, re-compute the pipeline after that point
+...and only after that point, so that if some input file changed externally, it doesn't affect your pipeline unless you explicitly re-evaluate it.
 
 ** Have an option to duplicate the current command
 And have it keep the cursor's position in the pipeline. The point is to be able to split the pipeline in the middle, and make a change which won't be reflected in the original.
@@ -128,7 +129,7 @@ And have it keep the cursor's position in the pipeline. The point is to be able 
 ** Be able to read from standard input
 So you can give your password to =sudo=, for instance.
 
-** Display things in a fancy way:
+** Display things in a fancy way
 
 *** Display records/tables inside other records/tables
 
@@ -146,7 +147,7 @@ You can't do this in the normal Nushell, but if the preceding stages of the pipe
 Or just a cancel button. See ~ListStream::ctrlc~. It may or may not be relevant to handle other control characters, but perhaps implement them in some other way. This isn't supposed to be a terminal emulator.
 
 ** Have a fancy table header row
-I have two ideas. Preferably, have it so that the table stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
+I have two ideas. Preferably, have it so that the table header stays docked at the top of the view when you scroll down. That would be awesome. If not, then at least have an extra header row at the bottom, so you can tell what's what when some long output gets printed, without having to scroll to the top. (Like it does in the terminal.)
 
 Actually, having the table header row docked at the top would be really easy. Just have the header row be separate from the actual table. Have a column with the header row, then below that, a ~Scrollable~ with the table contents.
 
@@ -161,7 +162,23 @@ each { |it| {name: $it.name, size: $it.size, type: (|)} }
 
 Assuming the =type= column was selected, now you can type a pipeline which only affects that one column and leaves the rest intact.
 
-Or perhaps an easier way: couldn't just have an option for =each= where you give it a column, then it runs =each= on only that column? Maybe add that as a pull request, or something.
+Or perhaps an easier way: couldn't just have an option for =each= where you give it a column, then it
+runs =each= on only that column? Maybe add that as a pull request, or something.
+
+[2024-01-10 Wed 21:15] There's already a command for this, but I forget what it's called, d'oh.
 
 ** Have a way of saving the current output to a file
 Useful if some external thing messes you up, so the output only lives in your open instance of Pipe Dream and you want to keep it. Then you can load it again later with =open=.
+
+** Live update mode
+Could you have it so that the UI automatically runs the command with every character you type? So you don't even need to hit the enter key, the output just updates itself live. There are two problems:
+
+a) The command is expensive.
+
+   Maybe if it runs in the background, doesn't freeze the UI, and doesn't interrupt your typing, it won't be that big of a deal.
+
+b) The command has side-effects.
+
+   You don't want it to implicitly delete files. Maybe you could help this by only running commands which consist entirely of Nushell built-in things, and perhaps Nushell provides an easy way to know whether a built-in command causes side effects.
+
+   If an input file is changed by an outside program, I don't see why that would be a problem. (Maybe it would mess up your pipeline.)

@@ -1,0 +1,13 @@
+I think there are three irritating niggles with every existing shell (that I know of) that I would like to improve on:
+
+1.  Running something multiple times, amending the pipeline each time.
+
+    Just an inefficient and slightly annoying workflow. In this program, you type each stage of the pipeline one by one.
+
+2.  Running a command with unexpectedly long output, not being able to find where the output started, and having to run it again, piping it through `less` this time.
+
+    And if you want to see it again, piping it into your pager again. In this program, the output of each stage of a pipeline will be in its own "buffer", so you don't need to look for where it started. The output of every stage in a pipeline will also be "paged" already, i.e. in a scrollable text area in the UI. Of course, you'll be able to control it with the keyboard.
+
+3.  Getting halfway through typing a command, then erasing it, experimenting with another one, then going back to where you were.
+
+    You navigate through pipelines with the keyboard. If you're halfway through a command, you press some keyboard shortcut to make a new pipeline, and experiment with your new command there. Then you copy the current pipeline to the clipboard, switch back, and paste it on the end. (The details will clearly need working out.)
