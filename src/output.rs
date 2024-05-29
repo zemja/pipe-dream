@@ -35,12 +35,8 @@ impl From<PipelineData> for Output {
                 => Output::from(vals.into_iter().map(Value).collect::<Vec<_>>()),
             PipelineData::Value(value, _) => Output::Value(Value(value)), // :(
             PipelineData::ListStream(stream, _)
-                => Output::from(stream.stream.map(Value).collect::<Vec<_>>()),
-            PipelineData::ExternalStream { stdout: None, .. } => Output::Raw(Ok(vec![])),
-            PipelineData::ExternalStream { stdout: Some(stdout), .. } => {
-                let result: Result<Vec<Vec<u8>>, _> = stdout.stream.collect();
-                Output::Raw(result.map(|vecs| vecs.into_iter().flatten().collect()))
-            }
+                => Output::from(stream.into_iter().map(Value).collect::<Vec<_>>()),
+            PipelineData::ByteStream(stream, _) => Output::Raw(stream.into_bytes()),
         }
     }
 }
@@ -61,12 +57,19 @@ impl From<Vec<Value>> for Output {
         let records: Vec<_> = values.into_iter()
             .map(|value| {
                 match value {
-                    Value(nu_protocol::Value::Record {
-                        val: nu_protocol::Record { cols, vals }, ..
-                    }) => {
-                        debug_assert_eq!(cols.len(), vals.len()); // I'm assuming this is how Nushell works.
-                        Record { cols, vals }
-                    },
+                    Value(nu_protocol::Value::Record { val, .. }) => {
+                        let cols: Vec<_> = val.columns().cloned().collect();
+                        let vals: Vec<_> = val.values().cloned().collect();
+
+                        // I'm assuming this is how Nushell works.
+                        debug_assert_eq!(cols.len(), vals.len());
+
+                        Record {
+                            cols: val.columns().cloned().collect(),
+                            vals: val.values().cloned().collect()
+                        }
+                    }
+
                     _ => unreachable!("Already checked"),
                 }
             })

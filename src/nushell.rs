@@ -1,5 +1,4 @@
 use nu_protocol::PipelineData;
-use s_macro::s;
 
 pub struct Nushell {
     engine_state: nu_protocol::engine::EngineState,
@@ -14,35 +13,28 @@ pub enum Error {
     Shell(#[from] nu_protocol::ShellError),
     #[error("I/O error: {0}")]
     IO(#[from] std::io::Error),
+    #[error("couldn't load std: {0}")]
+    LoadingStd(miette::ErrReport),
     #[error(r#"environment variable is not valid UTF-8"#)]
     InvalidEnvVar,
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
-
 impl Nushell {
-    pub fn new() -> Result<Nushell> {
-        let mut nushell = Nushell {
-            // Infuriating that this function just prints an error message if it fails and doesn't
-            // return a Result. But the only failure is something to do with plugins, so fingers
-            // crossed that's not my problem.
-            engine_state: nu_command::add_shell_command_context(
-                nu_cmd_lang::create_default_context()
-            ),
-            stack: nu_protocol::engine::Stack::new()
-        };
+    pub fn new() -> Result<Nushell, Error> {
+        let engine_state = nu_cmd_lang::create_default_context();
+        let mut engine_state = nu_command::add_shell_command_context(engine_state);
 
         let mut pwd = false;
 
         for (key, value) in std::env::vars_os() {
             if key == "PWD" { pwd = true; }
 
-            nushell.stack.add_env_var(
+            engine_state.add_env_var(
                 key.into_string().map_err(|_| Error::InvalidEnvVar)?,
-                nu_protocol::Value::String {
-                    val: value.into_string().map_err(|_| Error::InvalidEnvVar)?,
-                    internal_span: nu_protocol::Span::unknown()
-                }
+                nu_protocol::Value::string(
+                    value.into_string().map_err(|_| Error::InvalidEnvVar)?,
+                    nu_protocol::Span::unknown()
+                )
             )
         }
 
@@ -52,32 +44,39 @@ impl Nushell {
         if !pwd {
             if let Some(home) = dirs::home_dir() {
                 if let Some(home) = home.to_str() {
-                    nushell.stack.add_env_var(
-                        s!("PWD"),
-                        nu_protocol::Value::String {
-                            val: home.to_string(),
-                            internal_span: nu_protocol::Span::unknown(),
-                        }
+                    engine_state.add_env_var(
+                        String::from("PWD"),
+                        nu_protocol::Value::string(
+                            home.to_string(),
+                            nu_protocol::Span::unknown(),
+                        )
                     )
                 }
             }
         }
 
-        Ok(nushell)
+        nu_std::load_standard_library(&mut engine_state).map_err(Error::LoadingStd)?;
+
+        Ok(Nushell { engine_state, stack: nu_protocol::engine::Stack::new() })
     }
 
-    pub fn evaluate(&mut self, command: &str) -> Result<PipelineData> {
+    pub fn evaluate(&mut self, command: &str) -> Result<PipelineData, Error> {
         let mut working_set = nu_protocol::engine::StateWorkingSet::new(&self.engine_state);
         let block = nu_parser::parse(&mut working_set, None, command.as_bytes(), false);
+
+        // TODO Handle both parse errors and parse warnings here (both fields in StateWorkingSet).
+
+        if !working_set.parse_errors.is_empty() {
+            return Err(working_set.parse_errors.remove(0).into());
+        }
+
         self.engine_state.merge_delta(working_set.render())?;
 
-        nu_engine::eval_block(
+        nu_engine::eval_block::<nu_protocol::debugger::WithoutDebug>(
             &self.engine_state,
             &mut self.stack,
             &block,
-            PipelineData::Empty,
-            false,
-            false
+            PipelineData::Empty
         )
             .map_err(Error::from)
     }
