@@ -6,13 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-s-macro = "0.1"
-relm4 = "0.6"
+slint = "1.6"
+nu-engine = "0.94"
+nu-protocol = "0.94"
+nu-parser = "0.94"
+nu-command = { version = "0.94", features = ["which-support"] }
+nu-cmd-lang = "0.94"
+nu-std = "0.94"
+miette = "7.2"
 thiserror = "1.0"
-nu-protocol = "0.88"
-nu-engine = "0.88"
-nu-parser = "0.88"
-nu-command = "0.88"
-nu-cmd-lang = "0.88"
 dirs = "5.0"
-once_cell = "1.17"
+
+[build-dependencies]
+slint-build = "1.6"

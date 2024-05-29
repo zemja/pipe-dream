@@ -1,0 +1,25 @@
+import { LineEdit, TextEdit } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: "Pipe Dream";
+    preferred-width: 640px;
+    preferred-height: 480px;
+    forward-focus: prompt_edit;
+
+    in-out property<string> prompt;
+    in-out property<string> text;
+
+    callback accepted(string);
+
+    VerticalLayout {
+        TextEdit {
+            text <=> root.text;
+            enabled: false;
+        }
+
+        prompt_edit := LineEdit {
+            text <=> root.prompt;
+            accepted => { root.accepted(self.text); }
+        }
+    }
+}
