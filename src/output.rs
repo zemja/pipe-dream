@@ -8,6 +8,7 @@ pub struct Value(pub nu_protocol::Value);
 /// the same number of elements. It sucks to have to promise this, but it's so much easier to
 /// display when it's a vector of rows, rather than columns.
 #[derive(Clone, Debug)]
+#[allow(clippy::manual_non_exhaustive)]
 pub struct Table {
     pub header_row: Vec<String>,
     pub rows: Vec<Vec<Value>>,
@@ -22,7 +23,6 @@ pub enum Output {
     Empty,
     Value(Value),
     List(Vec<Value>),
-    /// Header row, then a vector of rows.
     Table(Table),
     Raw(Result<Vec<u8>, nu_protocol::ShellError>),
 }
@@ -46,7 +46,7 @@ impl From<PipelineData> for Output {
 }
 
 impl From<Vec<Value>> for Output {
-    /// Implemented for the special case that a list of records is to be treaded as a table.
+    /// Implemented for the special case that a list of records is to be treated as a table.
     fn from(values: Vec<Value>) -> Output {
         /// Makes records easier to work with.
         struct Record {
@@ -61,7 +61,9 @@ impl From<Vec<Value>> for Output {
         let records: Vec<_> = values.into_iter()
             .map(|value| {
                 match value {
-                    Value(nu_protocol::Value::Record { cols, vals, .. }) => {
+                    Value(nu_protocol::Value::Record {
+                        val: nu_protocol::Record { cols, vals }, ..
+                    }) => {
                         debug_assert_eq!(cols.len(), vals.len()); // I'm assuming this is how Nushell works.
                         Record { cols, vals }
                     },
@@ -86,7 +88,7 @@ impl From<Vec<Value>> for Output {
 
         for record in records {
             let mut new_row = vec![
-                Value(nu_protocol::Value::Nothing { span: Span::unknown() });
+                Value(nu_protocol::Value::Nothing { internal_span: Span::unknown() });
                 table.header_row.len()
             ];
 

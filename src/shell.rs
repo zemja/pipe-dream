@@ -9,7 +9,7 @@ pub struct Nushell {
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("failed to parse command: {0:?}")]
-    Parse(#[from] nu_parser::ParseError),
+    Parse(#[from] nu_protocol::ParseError),
     #[error("failed to evaluate command: {0:?}")]
     Shell(#[from] nu_protocol::ShellError),
     #[error("I/O error: {0}")]
@@ -26,7 +26,9 @@ impl Nushell {
             // Infuriating that this function just prints an error message if it fails and doesn't
             // return a Result. But the only failure is something to do with plugins, so fingers
             // crossed that's not my problem.
-            engine_state: nu_command::create_default_context(),
+            engine_state: nu_command::add_shell_command_context(
+                nu_cmd_lang::create_default_context()
+            ),
             stack: nu_protocol::engine::Stack::new()
         };
 
@@ -39,7 +41,7 @@ impl Nushell {
                 key.into_string().map_err(|_| Error::InvalidEnvVar)?,
                 nu_protocol::Value::String {
                     val: value.into_string().map_err(|_| Error::InvalidEnvVar)?,
-                    span: nu_protocol::Span::unknown()
+                    internal_span: nu_protocol::Span::unknown()
                 }
             )
         }
@@ -54,7 +56,7 @@ impl Nushell {
                         s!("PWD"),
                         nu_protocol::Value::String {
                             val: home.to_string(),
-                            span: nu_protocol::Span::unknown(),
+                            internal_span: nu_protocol::Span::unknown(),
                         }
                     )
                 }
@@ -66,11 +68,7 @@ impl Nushell {
 
     pub fn evaluate(&mut self, command: &str) -> Result<PipelineData> {
         let mut working_set = nu_protocol::engine::StateWorkingSet::new(&self.engine_state);
-        let block = match nu_parser::parse(&mut working_set, None, command.as_bytes(), false, &[]) {
-            (_, Some(err)) => return Err(err.into()),
-            (block, _) => block,
-        };
-
+        let block = nu_parser::parse(&mut working_set, None, command.as_bytes(), false);
         self.engine_state.merge_delta(working_set.render())?;
 
         nu_engine::eval_block(
