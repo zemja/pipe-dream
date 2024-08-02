@@ -1,4 +1,13 @@
-import { LineEdit, TextEdit } from "std-widgets.slint";
+import { LineEdit, TextEdit, ListView } from "std-widgets.slint";
+
+export enum Type {
+    empty,
+    value,
+    list,
+    table,
+    raw,
+    error,
+}
 
 export component MainWindow inherits Window {
     title: "Pipe Dream";
@@ -7,14 +16,48 @@ export component MainWindow inherits Window {
     forward-focus: prompt_edit;
 
     in-out property<string> prompt;
-    in-out property<string> text;
+
+    in property<Type> type;
+    in property<string> value;
+    in property<[string]> list;
+    in property<[[string]]> table;
+    in property<string> raw;
+    in property<string> error;
 
     callback accepted(string);
 
     VerticalLayout {
-        TextEdit {
-            text <=> root.text;
-            enabled: false;
+        if type == Type.empty : Text {
+            text: "empty";
+            color: grey;
+        }
+
+        if type == Type.value : Text {
+            text: "value: " + value;
+        }
+
+        if type == Type.list : ListView {
+            for value in list : Text {
+                text: value;
+            }
+        }
+
+        if type == Type.table : ListView {
+            for row in table : HorizontalLayout {
+                for column in row : Text {
+                    text: column;
+                }
+            }
+        }
+
+        if type == Type.raw : Text {
+            text: "raw: " + raw;
+            color: green;
+        }
+
+        if type == Type.error : Text {
+            text: "error: " + error;
+            color: red;
         }
 
         prompt_edit := LineEdit {
